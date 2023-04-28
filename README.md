@@ -26,8 +26,14 @@
 - https://contactsvc.bmaster.kro.kr/contacts
 
 
-## 테스트 프로그램 
+## 테스트/개발 프로그램 
 - postman : 네트워크 테스트 
+- mongodb : NOSQL DB
+    - 윈도우 버전 6.0.5 설치
+        - C:\mongodb 디렉토리 생성하여 그 안에 설치하기
+    - mongoshell 1.8.0 버전 설치
+        - C:\mongodb 디렉토리 밑에 압축 해제해서 붙여넣기
+- mongodb atlas : mongodb의 클라우드 서버
 
 
 ## server.js
