@@ -132,3 +132,6 @@ dist
 
 # modules 
 node_modules/*
+
+# file_db or db files
+*.db
