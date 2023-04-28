@@ -2,9 +2,15 @@
 const express = require('express');
 const path = require('path');
 const router = require('./router');
+const cors = require('cors'); // cross-domain 문제를 해결하는 middleware
+const fs = require('fs'); // 파일 저장 위한 middleware
+const morgan = require('morgan'); // 로그 기록 위한 middleware
+const rfs = require('rotating-file-stream'); // 로그 파일 분할 위한 middleware
 
 const startServer = async () => {
     const BASEDIR = process.env.BASEDIR || path.resolve('.');
+    const LOGDIR = process.env.LOGDIR || path.join(BASEDIR, '/log');
+    // 환경 변수가 있으면 그것을 이용하고, 없으면 /log 디렉토리 사용하자.
     const PORT = process.env.PORT || 8080;
 
     const logger = (req, res, next) => {
@@ -12,8 +18,17 @@ const startServer = async () => {
         next();
     };
     const app = express();
+    app.use(cors());
 
-    app.use(logger);
+    // 로깅
+    fs.existsSync(LOGDIR) || fs.mkdirSync(LOGDIR);
+    // 만약 LOGDIR이 있으면 그대로 쓰고, 아니면 mkdirSync 함수로 만들어라.
+    const accessLogStream = rfs.createStream('access.log', {
+        interval: '1d', // 매일 매일 로그 생성
+        path: LOGDIR // 위치 설정
+    });
+    app.use(morgan('combined', {stream: accessLogStream}));
+
     app.use(express.static(BASEDIR + '/public')); // /intro.html 요청하면 public/intro.html 반환해줌
     app.set('views', BASEDIR + '/views'); // views라는 폴더를 viewpage로 생성
     app.set('view engine', 'ejs'); // 페이지 엔진은 ejs를 쓸 것이다.
@@ -23,6 +38,16 @@ const startServer = async () => {
     app.use(express.urlencoded({
         extended: true
     }));
+
+    // 캐시를 저장하지 않는 middleware 작성
+    app.use(function (req, res, next) {
+        res.header(
+            'Cache-Control',
+            'private, no-cache, no-store, must-revalidate');
+        res.header('Expires', '-1');
+        res.header('Pragma', 'no-cache');
+        next();
+    });
 
     app.use(router);
 
