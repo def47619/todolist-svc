@@ -1,6 +1,17 @@
 const express = require('express');
 const app = express();
 const cookieParser = require('cookie-parser');
+const dotenv = require('dotenv'); // .env 환경설정 파일 imports
+
+// 있다면 설정하고, prodction이라면 production 그대로 설정 <-> 아니면 development 설정
+process.env.NODE_ENV = process.env.NODE_ENV && process.env.NODE_ENV === "production" ? "production" : "development";
+
+if (process.env.NODE_ENV === "production") {
+    dotenv.config({path: __dirname + '.env2'}); // .env2 설정
+} 
+else {
+    dotenv.config(); // .env 설정
+}
 
 const logger = (req, res, next) => {
     console.log(`### ${req.method}, ${req.url}`);
@@ -20,7 +31,7 @@ app.use(express.static(__dirname + '/public'));
 // localhost:8080/intro.html 으로 요청해야 한다. 
 
 // app.use(cookieParser('secretkey1111'));
-app.use(cookieParser('secretkey1111')); // signedCookies를 사용하기 위해서는 생성자 안의 문자열이 필요한 것 같다. 
+app.use(cookieParser(process.env.SECRET)); // signedCookies를 사용하기 위해서는 생성자 안의 문자열이 필요한 것 같다. 
 // 아마도 문자열이 sign을 위한 서명 문자열을 담당하는 것 같다.
 
 app.get('/', (req, res) => {
@@ -33,7 +44,6 @@ app.get('/cookie', (req, res) => {
     // 위의 cookie를 따로 생성할 필요는 없는 것 같다. 아마도 /cookie를 탐색하면서 /를 지나오면서 cookie를 생성하여
     // /cookie에서는 루트 페이지의 쿠키를 그대로 사용하는 것 같다. 
     res.send(`<h1>쿠키 생성 완료 : ${req.signedCookies.key1}</h1><hr>`);
-    res.send(req.signedCookies);
 });
 
 app.get('/ko', (req, res) => {
@@ -42,6 +52,6 @@ app.get('/ko', (req, res) => {
     res.json({requrl: req.url, msg:'안녕'});
 });
 
-app.listen(8080, () => {
-    console.log(`### 8080 포트의 서버가 구동되었습니다.`);
+app.listen(process.env.PORT, () => {
+    console.log(`### ${process.env.PORT} 포트의 서버가 구동되었습니다.`);
 });

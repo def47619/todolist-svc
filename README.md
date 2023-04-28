@@ -5,6 +5,8 @@
 - npm install -D nodemon 
     - 변경된 사항 모니터링 -> 테스트 중인 서버에 바로 적용 
 - npm install cookie-parser
+- npm install --save dotenv
+    - 환경변수 설정 : .env 파일에 적절한 키:값 쌍을 설정함
 
 
 ## API sites
